@@ -13,7 +13,8 @@
     "bitbucket": "^2.9.0",
     "dotenv": "^16.0.3",
     "minimist": "^1.2.7",
-    "prettier-package-json": "^2.7.0"
+    "prettier-package-json": "^2.7.0",
+    "winston": "^3.8.2"
   },
   "type": "module",
   "devDependencies": {

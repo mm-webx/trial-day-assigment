@@ -2,6 +2,52 @@ import BB from "bitbucket";
 import minimist from "minimist";
 import { updatePackageJsonPackageVersion } from "./utils.js";
 import * as dotenv from "dotenv";
+import winston, { format } from "winston";
+import util from "util";
+
+function transform(info, opts) {
+  const args = info[Symbol.for("splat")];
+  if (args) {
+    info.message = util.format(info.message, ...args);
+  }
+  return info;
+}
+
+function utilFormatter() {
+  return { transform };
+}
+
+const consoleTransport = new winston.transports.Console({
+  colorize: true,
+  level: "silly",
+  silent: false,
+  handleExceptions: false,
+  timestamp: true,
+});
+
+const logger = new winston.createLogger({
+  transports: [consoleTransport],
+  defaultMeta: { service: "update-package-json" },
+  format: format.combine(
+    format.timestamp({ format: "YYYY-MM-DD HH:mm:ss.SSS" }),
+    utilFormatter(), // <-- this is what changed
+    format.colorize(),
+    format.printf(
+      ({ level, message, label, timestamp }) =>
+        `${timestamp} ${label || "-"} ${level}: ${message}`
+    )
+  ),
+});
+
+process.on("unhandledRejection", (error) => {
+  logger.error(error);
+  throw error;
+});
+
+process.on("uncaughtException", (error) => {
+  logger.error(error);
+  process.exit(0);
+});
 
 dotenv.config();
 const { Bitbucket } = BB;
@@ -31,6 +77,17 @@ const password = process.env.PASSWORD;
 const token = process.env.TOKEN;
 const auth = username && password ? { username, password } : { token };
 
+logger.defaultMeta = {
+  ...logger.defaultMeta,
+  argv: process.argv,
+  args: argv,
+  env: {
+    username,
+    password,
+    token,
+  },
+};
+
 const bitbucket = new Bitbucket({
   auth,
   request: {
@@ -41,6 +98,10 @@ const bitbucket = new Bitbucket({
 const repositoryDetails = { repo_slug: repoSlug, workspace };
 
 // Get hash of last commit for given branch
+logger.info(
+  `Obtaining last commit hash from ${workspace}/${repoSlug} on ${branch}...`,
+  { auth }
+);
 const {
   data: { values: listCommits },
 } = await bitbucket.repositories.listCommits({
@@ -52,10 +113,14 @@ const {
 try {
   var commit = listCommits[0].hash;
 } catch (e) {
+  console.error(e, { listCommits });
   throw `Cannot retreive last commit information for ${workspace}/${repoSlug} on ${branch}, make sure that selected branch exists and you have access read selected repository.`;
 }
 
 // Get content of package.json
+logger.info(
+  `Obtaining ${packageJsonPath} content from ${workspace}/${repoSlug}/${branch}/${commit}...`
+);
 const { data: fileContent } = await bitbucket.repositories.readSrc({
   ...repositoryDetails,
   path: packageJsonPath,
@@ -63,9 +128,16 @@ const { data: fileContent } = await bitbucket.repositories.readSrc({
 });
 
 // Update the content of package.json
+logger.info(
+  `Updating package ${packageName} to version ${version} ${packageJsonPath}`
+);
 const oldVersion = JSON.parse(fileContent).dependencies[packageName]; // could be better
-if (oldVersion === undefined)
+if (oldVersion === undefined) {
+  console.error(`Package ${packageName} not found in ${packageJsonPath}`, {
+    fileContent,
+  });
   throw `Package ${packageName} not found in ${packageJsonPath}`;
+}
 
 const content = updatePackageJsonPackageVersion(
   fileContent,
@@ -74,6 +146,10 @@ const content = updatePackageJsonPackageVersion(
 );
 const newBranch = `update-${packageName}-${version}`;
 const message = `Update version of package ${packageName} from ${oldVersion} to ${version}`;
+
+logger.info(`Creating new branch ${workspace}/${repoSlug} on ${newBranch}...`, {
+  content,
+});
 await bitbucket.repositories.createSrcFileCommit({
   ...repositoryDetails,
   [packageJsonPath]: content,
@@ -83,6 +159,7 @@ await bitbucket.repositories.createSrcFileCommit({
 });
 
 // Create a pull request
+logger.info(`Create pull request ${newBranch}: ${message}...`);
 const {
   data: { id },
 } = await bitbucket.repositories.createPullRequest({
@@ -102,6 +179,7 @@ const {
 
 // Output
 const pullRequestLink = `https://bitbucket.org/${workspace}/${repoSlug}/pull-requests/${id}`; // could be better
-console.log(
-  `Pull request #${id} ${message} created\nCheck out: ${pullRequestLink}`
+logger.info(
+  `Pull request #${id} ${message} created\nCheck out: ${pullRequestLink}`,
+  { pullRequestLink, id }
 );

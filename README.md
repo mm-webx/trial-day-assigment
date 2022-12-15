@@ -80,3 +80,9 @@ Running tests `npm tests`
 ## Build
 
 TBD
+
+## Changelog 
+
+### v0.0.2 Logs support:
+
+- added logs
