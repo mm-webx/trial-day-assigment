@@ -2,7 +2,7 @@
 
 This script is used to update the version of a package in a Bitbucket repository. The script will create a new branch, commit the updated package version in `package.json`, and create a pull request for the changes.
 
-![preview](screenshoot.jpeg) ![]
+![preview](screenshoot.jpeg)
 
 ## Requirements
 
@@ -38,14 +38,14 @@ Alternatively, the `TOKEN` environment variable can be set with a personal acces
 
 To update the version of the lodash package to 4.17.15 in the my-workspace workspace, my-repo repository, on the development branch, with the John Doe <john.doe@example.com> as the author, run the following command:
 
-        USERNAME=john.doe PASSWORD=my-password node update-package.js --packageName lodash --version 4.17.15 --workspace my-workspace --repoSlug my-repo --branch development --author "John Doe <john.doe@example.com>" --packageJsonPath=package.json
+    USERNAME=john.doe PASSWORD=my-password node update-package.js --packageName lodash --version 4.17.15 --workspace my-workspace --repoSlug my-repo --branch development --author "John Doe <john.doe@example.com>" --packageJsonPath=package.json
 
 ### Output
 
 The script will output a message indicating the pull request number and URL, for example:
 
-        Pull request #42 Update version of package lodash from 4.17.14 to 4.17.15 created
-        Check out: https://bitbucket.org/my-workspace/my-repo/pull-requests/42
+    Pull request #42 Update version of package lodash from 4.17.14 to 4.17.15 created
+    Check out: https://bitbucket.org/my-workspace/my-repo/pull-requests/42
 
 ## Notes
 
