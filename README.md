@@ -51,9 +51,9 @@ The script will output a message indicating the pull request number and URL, for
 
 - The script authenticates to the Bitbucket API using the provided username and password, alternatively token. You may need to create an app password for the script to use. Please check instructions here: <https://support.atlassian.com/bitbucket-cloud/docs/create-an-app-password/>
 - You need to create credentials with permissions below:
--- `repository:read` - to read `package.json` file
--- `repository:write` - to update `package.json` file
--- `pullrequest:write` - to create pull request
+  - `repository:read` - to read `package.json` file
+  - `repository:write` - to update `package.json` file
+  - `pullrequest:write` - to create pull request
 - The script assumes that the `package.json` file uses the correct formatting and structure. It will use the `prettier-package-json` package to format the file after updating the version.
 - The script will create a new branch for the changes, using the pattern `update-<packageName>-<version>`. It will commit the changes to this branch and create a pull request for the changes.
 - The script will throw an error if any of the required parameters are not provided or are invalid. It will also throw an error if it cannot retrieve the last commit information or if the specified package is not found in the `package.json` file.
