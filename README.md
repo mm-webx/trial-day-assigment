@@ -13,7 +13,7 @@ This script is used to update the version of a package in a Bitbucket repository
 
 To use the script, run the following command:
 
-    node update-package.js --packageName <packageName> --version <version> --workspace <workspace> --repoSlug <repoSlug>
+    node update-package.js --packageName <packageName> --version <new-version> --workspace <workspace-name> --repoSlug <repository-name> [--branch <branch-name> --author <author-name> --packageJsonPath <path-to-package-json>]
 
 The script accepts the following parameters:
 
@@ -38,7 +38,7 @@ Alternatively, the `TOKEN` environment variable can be set with a personal acces
 
 To update the version of the lodash package to 4.17.15 in the my-workspace workspace, my-repo repository, on the development branch, with the John Doe <john.doe@example.com> as the author, run the following command:
 
-        USERNAME=john.doe PASSWORD=my-password node update-package.js --packageName lodash --version 4.17.15 --workspace my-workspace --repoSlug my-repo --branch development --author "John Doe <john.doe@example.com>"
+        USERNAME=john.doe PASSWORD=my-password node update-package.js --packageName lodash --version 4.17.15 --workspace my-workspace --repoSlug my-repo --branch development --author "John Doe <john.doe@example.com>" --packageJsonPath=package.json
 
 ### Output
 
