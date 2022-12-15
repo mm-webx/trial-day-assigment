@@ -4,6 +4,17 @@ This script is used to update the version of a package in a Bitbucket repository
 
 ![preview](screenshoot.jpeg)
 
+## COMMENTS
+
+- this script does not check the current version of the package, so it can also be used to downgrade the package's version if desired
+- the script will throw an error if the specified package does not exist in the `package.json` file, however this behavior can be removed if desired to allow the script to create new dependencies. This script can be easily modified to support multiple `package.json files` (e.g. for a monorepo) by allowing the user to specify multiple files and optionally creating a separate pull request for each file.
+- Error Handling: this script should have better error handling with clear error messages (one laners), especially when is used in CI/CD
+- UI: it's possible to use `Inquirer.js` to provide support for command line interface - it will allow to run this via npx without typing a long command
+- CI/CD: some of automation processes has access to COMMIT HASH, TOKEN, BRANCH NAME or already have an access to repository, it's possible to detect environment and use `git` commands instead of Bitbucket API
+- Logging: create some logs?
+- We can check how other libraries handle this process
+  - [npm-check-updates](https://github.com/raineorshine/npm-check-updates) upgrades your package.json dependencies to the latest versions, ignoring specified versions. 
+
 ## Requirements
 
 - Node.js
@@ -57,3 +68,15 @@ The script will output a message indicating the pull request number and URL, for
 - The script assumes that the `package.json` file uses the correct formatting and structure. It will use the `prettier-package-json` package to format the file after updating the version.
 - The script will create a new branch for the changes, using the pattern `update-<packageName>-<version>`. It will commit the changes to this branch and create a pull request for the changes.
 - The script will throw an error if any of the required parameters are not provided or are invalid. It will also throw an error if it cannot retrieve the last commit information or if the specified package is not found in the `package.json` file.
+
+## Development
+
+Install requirements `npm install`
+
+## Tests
+
+Running tests `npm tests`
+
+## Build
+
+TBD
